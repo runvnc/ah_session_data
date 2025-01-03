@@ -1,0 +1,7 @@
+{
+  "name": "Session Data",
+  "version": "1.0.0",
+  "description": "Temporarily prepend last message with editable session data",
+  "services": [],
+  "commands": [ "session_data_update", "session_data_del", "session_data_list_add", "session_data_list_del" ]
+}
