@@ -36,6 +36,8 @@ def add_session_data(data: dict, context=None) -> dict:
 
     If there is no 'session' in context['data'] then do nothing.
     """
+    # print in yellow with blue background
+    print("\033[43;34m add_session_data \033[m")
     if 'data' in context:
         context_data = context['data']
         if context_data is None:
@@ -45,7 +47,10 @@ def add_session_data(data: dict, context=None) -> dict:
             messages = data['messages']
             last_msg_content = messages[-1]['content']
             fmt_data = format_session_data(context_data['session'])
+            print("ah_session_data: Found session data in context data")
+            print(fmt_data)
             if isinstance(last_msg_content, str):
+                print("ah_session_data: Last message content is a string")
                 messages[-1]['content'] = fmt_data + last_msg_content
                 data['messages'] = messages
                 return data
