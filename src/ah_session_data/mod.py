@@ -100,6 +100,7 @@ async def session_data_update(updates: dict, context=None) -> dict:
         context.data['session'] = {}
 
     context.data['session'] = update_session_data(updates, context.data['session'])
+    context.save_context()
     return context.data['session']
 
 
@@ -123,6 +124,8 @@ async def session_data_del(path: list, context=None) -> dict:
         raise ValueError("No session data exists")
 
     context.data['session'] = delete_session_data(path, context.data['session'])
+    context.save_context()
+ 
     return context.data['session']
 
 
@@ -151,6 +154,8 @@ async def session_data_list_add(path: list, value: any, context=None) -> dict:
         context.data['session'] = {}
 
     context.data['session'] = add_to_session_list(path, value, context.data['session'])
+    context.save_context()
+ 
     return context.data['session']
 
 
@@ -176,4 +181,6 @@ async def session_data_list_del(path: list, index: int, context=None) -> dict:
         raise ValueError("No session data exists")
 
     context.data['session'] = delete_from_session_list(path, index, context.data['session'])
+    context.save_context()
+ 
     return context.data['session']
