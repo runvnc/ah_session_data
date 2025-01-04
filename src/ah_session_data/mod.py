@@ -49,108 +49,82 @@ def add_formatted_session_data(data: dict, context_data: dict) -> dict:
 @pipe(name='filter_messages', priority=8)
 def add_session_data(data: dict, context=None) -> dict:
     """
-    Add context['data']['session'] to the front of last message
+    Add context.data['session'] to the front of last message
     Message content may be a string or list
     If list then insert a text entry at the front
 
-    If there is no 'session' in context['data'] then do nothing.
+    If there is no 'session' in context.data then do nothing.
     """
-    # print in yellow with blue background
     try:
         print("\033[43;34m add_session_data \033[m")
-        context_data = context.data
-        if context_data is None:
+        if context is None or not hasattr(context, 'data'):
             print("No context data found in ah_session_data")
             return data
-        if 'session' in context_data:
-            return add_formatted_session_data(data, context_data)
+            
+        if 'session' in context.data:
+            return add_formatted_session_data(data, context.data)
         else:
             print("ah_session_data: No session data in context data. adding timestamp")
-            # need server time to indicate time zone
-            server_time = str(datetime.now())
             context.data['session'] = { "server_time": str(datetime.now()) }
             return add_formatted_session_data(data, context.data)
 
     except Exception as e:
-        #print in red with white background
         trace = traceback.format_exc()
         print(f"\033[41;37m Error in ah_session_data: \n {e} \n {trace} \033[m")
         return data
+
 
 @command()
 async def session_data_update(updates: dict, context=None) -> dict:
     """
     Update session data with merge semantics - only specified fields are modified.
     Nested dictionaries are merged recursively. Lists are replaced entirely.
-    
-    Example:
-    { "session_data_update": { 
-        "updates": {
-            "user": {
-                "preferences": {
-                    "theme": "dark"  # Only updates theme, keeps other preferences
-                }
-            }
-        }
-    }}
     """
-    if context is None or 'data' not in context:
-        context['data'] = {}
-    if 'session' not in context['data']:
-        context['data']['session'] = {}
+    if context is None or not hasattr(context, 'data'):
+        raise ValueError("Context or context.data not available")
+        
+    if 'session' not in context.data:
+        context.data['session'] = {}
 
-    context['data']['session'] = update_session_data(updates, context['data']['session'])
-    return context['data']['session']
+    context.data['session'] = update_session_data(updates, context.data['session'])
+    return context.data['session']
+
 
 @command()
 async def session_data_del(path: list, context=None) -> dict:
     """
     Delete a value from session data at the specified path.
-    
-    Example:
-    { "session_data_del": { 
-        "path": ["user", "preferences", "theme"]
-    }}
     """
-    if context is None or 'data' not in context or 'session' not in context['data']:
+    if context is None or not hasattr(context, 'data') or 'session' not in context.data:
         raise ValueError("No session data exists")
 
-    context['data']['session'] = delete_session_data(path, context['data']['session'])
-    return context['data']['session']
+    context.data['session'] = delete_session_data(path, context.data['session'])
+    return context.data['session']
+
 
 @command()
 async def session_data_list_add(path: list, value: any, context=None) -> dict:
     """
     Add a value to a list at the specified path in session data.
     Creates the list if it doesn't exist.
-    
-    Example:
-    { "session_data_list_add": { 
-        "path": ["user", "history"],
-        "value": "new_entry"
-    }}
     """
-    if context is None or 'data' not in context:
-        context['data'] = {}
-    if 'session' not in context['data']:
-        context['data']['session'] = {}
+    if context is None or not hasattr(context, 'data'):
+        raise ValueError("Context or context.data not available")
+        
+    if 'session' not in context.data:
+        context.data['session'] = {}
 
-    context['data']['session'] = add_to_session_list(path, value, context['data']['session'])
-    return context['data']['session']
+    context.data['session'] = add_to_session_list(path, value, context.data['session'])
+    return context.data['session']
+
 
 @command()
 async def session_data_list_del(path: list, index: int, context=None) -> dict:
     """
     Delete an item from a list at the specified path and index in session data.
-    
-    Example:
-    { "session_data_list_del": { 
-        "path": ["user", "history"],
-        "index": 0
-    }}
     """
-    if context is None or 'data' not in context or 'session' not in context['data']:
+    if context is None or not hasattr(context, 'data') or 'session' not in context.data:
         raise ValueError("No session data exists")
 
-    context['data']['session'] = delete_from_session_list(path, index, context['data']['session'])
-    return context['data']['session']
+    context.data['session'] = delete_from_session_list(path, index, context.data['session'])
+    return context.data['session']
