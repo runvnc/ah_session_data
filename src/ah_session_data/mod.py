@@ -6,7 +6,7 @@ from .session_data import (
     add_to_session_list,
     delete_from_session_list
 )
-
+import traceback
 from datetime import datetime
 from tzlocal import get_localzone
 
@@ -37,40 +37,47 @@ def add_session_data(data: dict, context=None) -> dict:
     If there is no 'session' in context['data'] then do nothing.
     """
     # print in yellow with blue background
-    print("\033[43;34m add_session_data \033[m")
-    if 'data' in context:
-        context_data = context['data']
-        if context_data is None:
-            print("No context data found in ah_session_data")
-            return data
-        if 'session' in context_data:
-            messages = data['messages']
-            last_msg_content = messages[-1]['content']
-            fmt_data = format_session_data(context_data['session'])
-            print("ah_session_data: Found session data in context data")
-            print(fmt_data)
-            if isinstance(last_msg_content, str):
-                print("ah_session_data: Last message content is a string")
-                messages[-1]['content'] = fmt_data + last_msg_content
-                data['messages'] = messages
+    try:
+        print("\033[43;34m add_session_data \033[m")
+        if 'data' in context:
+            context_data = context['data']
+            if context_data is None:
+                print("No context data found in ah_session_data")
                 return data
-            elif isinstance(last_msg_content, list):
-                obj = { "type": "text", "text": fmt_data }
-                messages[-1]['content'].insert(0, obj)
-                data['messages'] = messages
-                return data
+            if 'session' in context_data:
+                messages = data['messages']
+                last_msg_content = messages[-1]['content']
+                fmt_data = format_session_data(context_data['session'])
+                print("ah_session_data: Found session data in context data")
+                print(fmt_data)
+                if isinstance(last_msg_content, str):
+                    print("ah_session_data: Last message content is a string")
+                    messages[-1]['content'] = fmt_data + last_msg_content
+                    data['messages'] = messages
+                    return data
+                elif isinstance(last_msg_content, list):
+                    obj = { "type": "text", "text": fmt_data }
+                    messages[-1]['content'].insert(0, obj)
+                    data['messages'] = messages
+                    return data
+                else:
+                    print("ah_session_data: Last message content is not a string or list")
+                    return data
             else:
-                print("ah_session_data: Last message content is not a string or list")
+                print("ah_session_data: No session data in context data. adding timestamp")
+                # need server time to indicate time zone
+                server_time = str(datetime.now())
+                context['data']['session'] = { "server_time": str(datetime.now()) }
                 return data
         else:
-            print("ah_session_data: No session data in context data. adding timestamp")
-            # need server time to indicate time zone
-            server_time = str(datetime.now())
-            context['data']['session'] = { "server_time": str(datetime.now()) }
+            print("ah_session_data: No data key in context")
             return data
-    else:
-        print("ah_session_data: No data key in context")
-        return data
+
+    except Exception as e:
+        #print in red with white background
+        trace = traceback.format_exc()
+        print(f"\033[41;37m Error in ah_session_data: \n {e} \n {trace} \033[m")
+
 
 @command()
 async def session_data_update(updates: dict, context=None) -> dict:
