@@ -44,6 +44,12 @@ def add_formatted_session_data(data: dict, context_data: dict) -> dict:
         messages[-1]['content'].insert(0, obj)
         data['messages'] = messages
         return data
+    elif isinstance(last_msg_content, dict):
+        print("ah_session_data: Last message content is a dict")
+        if last_msg_content['type'] == 'text':
+            messages[-1]['content']['text'] = fmt_data + last_msg_content['text']
+            data['messages'] = messages
+        return data
 
 
 @pipe(name='filter_messages', priority=8)
