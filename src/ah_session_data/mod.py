@@ -85,6 +85,13 @@ async def session_data_update(updates: dict, context=None) -> dict:
     """
     Update session data with merge semantics - only specified fields are modified.
     Nested dictionaries are merged recursively. Lists are replaced entirely.
+    Args:
+        updates: Dictionary containing the updates to apply
+        session_data: Existing session data (or None to start fresh)
+    
+    Returns:
+        Updated session data dictionary
+ 
     """
     if context is None or not hasattr(context, 'data'):
         raise ValueError("Context or context.data not available")
@@ -100,6 +107,17 @@ async def session_data_update(updates: dict, context=None) -> dict:
 async def session_data_del(path: list, context=None) -> dict:
     """
     Delete a value from session data at the specified path.
+    
+    Args:
+        path: List of keys forming path to the value to delete
+        session_data: Existing session data
+        
+    Returns:
+        Updated session data dictionary
+        
+    Raises:
+        KeyError: If path is invalid
+ 
     """
     if context is None or not hasattr(context, 'data') or 'session' not in context.data:
         raise ValueError("No session data exists")
@@ -113,6 +131,18 @@ async def session_data_list_add(path: list, value: any, context=None) -> dict:
     """
     Add a value to a list at the specified path in session data.
     Creates the list if it doesn't exist.
+
+    Args:
+        path: List of keys forming path to the target list
+        value: Value to append to the list
+        session_data: Existing session data
+        
+    Returns:
+        Updated session data dictionary
+        
+    Raises:
+        ValueError: If target exists but is not a list
+ 
     """
     if context is None or not hasattr(context, 'data'):
         raise ValueError("Context or context.data not available")
@@ -128,6 +158,19 @@ async def session_data_list_add(path: list, value: any, context=None) -> dict:
 async def session_data_list_del(path: list, index: int, context=None) -> dict:
     """
     Delete an item from a list at the specified path and index in session data.
+
+    Args:
+        path: List of keys forming path to the target list
+        index: Index of item to delete
+        session_data: Existing session data
+        
+    Returns:
+        Updated session data dictionary
+        
+    Raises:
+        KeyError: If path is invalid
+        ValueError: If target is not a list or index out of range
+     
     """
     if context is None or not hasattr(context, 'data') or 'session' not in context.data:
         raise ValueError("No session data exists")
