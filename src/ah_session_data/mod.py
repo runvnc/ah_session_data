@@ -72,6 +72,7 @@ def add_session_data(data: dict, context=None) -> dict:
         else:
             print("ah_session_data: No session data in context data. adding timestamp")
             context.data['session'] = { "server_time": str(datetime.now()) }
+            context.save_context()
             return add_formatted_session_data(data, context.data)
 
     except Exception as e:
