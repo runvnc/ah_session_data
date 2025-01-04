@@ -7,6 +7,15 @@ from .session_data import (
     delete_from_session_list
 )
 
+from datetime import datetime
+from tzlocal import get_localzone
+
+def get_local_time_with_tz():
+    local_tz = get_localzone()
+    local_time = datetime.now(local_tz)
+    return local_time.strftime('%Y-%m-%d %H:%M:%S %Z%z')
+
+
 def format_session_data(data: dict) -> str:
     return f"""
 
@@ -49,7 +58,10 @@ def add_session_data(data: dict, context=None) -> dict:
                 print("ah_session_data: Last message content is not a string or list")
                 return data
         else:
-            print("ah_session_data: No session data in context data")
+            print("ah_session_data: No session data in context data. adding timestamp")
+            # need server time to indicate time zone
+            server_time = str(datetime.now())
+            context['data']['session'] = { "server_time": str(datetime.now()) }
             return data
     else:
         print("ah_session_data: No data key in context")
