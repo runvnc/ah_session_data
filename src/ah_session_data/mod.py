@@ -29,7 +29,10 @@ def format_session_data(data: dict) -> str:
 
 
 def add_formatted_session_data(data: dict, context_data: dict) -> dict:
-    messages = data['messages']
+    # we need to change this to actually make a deep copy of messages
+    # 
+    #messages = data['messages']
+    messages = data['messages'].copy()
     last_msg_content = messages[-1]['content']
     fmt_data = format_session_data(context_data['session'])
     print("ah_session_data: Found session data in context data")
