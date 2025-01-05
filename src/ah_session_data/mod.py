@@ -41,18 +41,18 @@ def add_formatted_session_data(data: dict, context_data: dict) -> dict:
         print("ah_session_data: Last message content is a string")
         messages[-1]['content'] = fmt_data + last_msg_content
         data['messages'] = messages
-        return data
+        return None
     elif isinstance(last_msg_content, list):
         obj = { "type": "text", "text": fmt_data }
         messages[-1]['content'].insert(0, obj)
         data['messages'] = messages
-        return data
+        return None
     elif isinstance(last_msg_content, dict):
         print("ah_session_data: Last message content is a dict")
         if last_msg_content['type'] == 'text':
             messages[-1]['content']['text'] = fmt_data + last_msg_content['text']
             data['messages'] = messages
-        return data
+        return None
 
 
 @pipe(name='filter_messages', priority=8)
@@ -68,7 +68,7 @@ def add_session_data(data: dict, context=None) -> dict:
         print("\033[43;34m add_session_data \033[m")
         if context is None or not hasattr(context, 'data'):
             print("No context data found in ah_session_data")
-            return data
+            return None
             
         if 'session' in context.data:
             return add_formatted_session_data(data, context.data)
@@ -105,7 +105,7 @@ async def session_data_update(updates: dict, context=None) -> dict:
 
     context.data['session'] = update_session_data(updates, context.data['session'])
     context.save_context_data()
-    return context.data['session']
+    return None
 
 
 @command()
@@ -130,7 +130,7 @@ async def session_data_del(path: list, context=None) -> dict:
     context.data['session'] = delete_session_data(path, context.data['session'])
     context.save_context_data()
  
-    return context.data['session']
+    return None
 
 
 @command()
@@ -160,7 +160,7 @@ async def session_data_list_add(path: list, value: any, context=None) -> dict:
     context.data['session'] = add_to_session_list(path, value, context.data['session'])
     context.save_context_data()
  
-    return context.data['session']
+    return None
 
 
 @command()
@@ -187,4 +187,5 @@ async def session_data_list_del(path: list, index: int, context=None) -> dict:
     context.data['session'] = delete_from_session_list(path, index, context.data['session'])
     context.save_context_data()
  
-    return context.data['session']
+    return None
+
