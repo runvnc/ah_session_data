@@ -41,18 +41,18 @@ def add_formatted_session_data(data: dict, context_data: dict) -> dict:
         print("ah_session_data: Last message content is a string")
         messages[-1]['content'] = fmt_data + last_msg_content
         data['messages'] = messages
-        return None
+        return data
     elif isinstance(last_msg_content, list):
         obj = { "type": "text", "text": fmt_data }
         messages[-1]['content'].insert(0, obj)
         data['messages'] = messages
-        return None
+        return data
     elif isinstance(last_msg_content, dict):
         print("ah_session_data: Last message content is a dict")
         if last_msg_content['type'] == 'text':
             messages[-1]['content']['text'] = fmt_data + last_msg_content['text']
             data['messages'] = messages
-        return None
+        return data
 
 
 @pipe(name='filter_messages', priority=8)
@@ -97,16 +97,21 @@ async def session_data_update(updates: dict, context=None) -> dict:
         Updated session data dictionary
  
     """
-    if context is None or not hasattr(context, 'data'):
-        raise ValueError("Context or context.data not available")
-        
-    if 'session' not in context.data:
-        context.data['session'] = {}
+    try:
+        if context is None or not hasattr(context, 'data'):
+            raise ValueError("Context or context.data not available")
+            
+        if 'session' not in context.data:
+            context.data['session'] = {}
 
-    context.data['session'] = update_session_data(updates, context.data['session'])
-    context.save_context_data()
-    return None
-
+        context.data['session'] = update_session_data(updates, context.data['session'])
+        context.save_context_data()
+        return None
+    except Exception as e:
+        trace = traceback.format_exc()
+        print(f"\033[41;37m Error in session_data_update: \n {e} \n {trace} \033[m")
+        raise Error(f"Error in session_data_update: {e}\n{trace}")
+        return None
 
 @command()
 async def session_data_del(path: list, context=None) -> dict:
